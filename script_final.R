@@ -1,297 +1,256 @@
-
-# Script do artigo de PotÍncias Intermedi·rias 2020.2
+# Script do artigo de Pot√™ncias Intermedi√°rias 2020.2
 # Prof. Dr. Rafael Mesquita
 # Discente: Felipe Lira Afonso Ferreira Paiva
 
-
-# Dados disponÌveis em: https://github.com/felipelirapaiva/PISI
-
-
+# Dados dispon√≠veis em: https://github.com/felipelirapaiva/PISI
 
 #### PARTE 1: Organizando e analisando apenas o WPI.
 
 # Abrindo o banco de dados do WPI.
 library(readxl)
-  WPI <- read_excel("C:/Users/Felipe/Desktop/WPI.xlsx")
-    View(WPI)
 
+WPI <- read_excel("C:/Users/Felipe/Desktop/WPI.xlsx")
 
 # Transformando num banco "longo":
-library(tidyr)
-    WPI_1 <- WPI %>%
-    pivot_longer(
-      `1975.0`:`2017.0`,
-        names_to = "ano")
-
-    str(WPI_1)
-
-# Transformando a vari·vel de ano em numÈrica
-  WPI_1$ano <- as.numeric(as.character(WPI_1$ano))
-
-  
-# Renomeando as vari·veis
-library(tidyverse)  
-  WPI_2 <- WPI_1 %>% 
+library(tidyverse)
+    
+WPI_2 <- WPI %>%
+    pivot_longer(`1975.0`:`2017.0`,names_to = "ano") %>%
+    mutate(ano = as.numeric(ano)) %>% 
     rename(poder = value,
-           paÌs = WPI)
-
+           pa√≠s = WPI)
 
 # Descritivos
-  WPI_2 %>%
+WPI_2 %>%
     summarise(media = mean(poder, na.rm = TRUE), 
               mediana = median(poder, na.rm = TRUE), 
               minimo = min(poder, na.rm = TRUE),
               maximo = max(poder, na.rm = TRUE))
 
-  WPI_2 %>%
-    group_by(paÌs)%>%
+WPI_2 %>%
+    group_by(pa√≠s)%>%
     summarise(media = mean(poder, na.rm = TRUE), 
               mediana = median(poder, na.rm = TRUE), 
               minimo = min(poder, na.rm = TRUE),
               maximo = max(poder, na.rm = TRUE))
-
 
 library(ggplot2)
 
+# Filtrando apenas os pa√≠ses que tiveram uma OI
+SGs_db <- read_excel("C:/Users/Felipe/Desktop/SGs_db.xlsx")  
 
-# Filtrando apenas os paÌses que tiveram uma OI
-  library(dplyr)
-  
-    WPI_3 <- WPI_2 %>%
-    filter(paÌs %in% c("Estados Unidos","FranÁa","Jap„o","SuÈcia",
-           "Egito","Brasil","NigÈria","Õndia","Austr·lia","Senegal",
-           "Canad·","SuÌÁa","Gana","Reino Unido", "ArgÈlia","Chile",
-           "Dinamarca","It·lia","Alemanha","Espanha","Filipinas",
-           "LÌbano","Portugal","China","CorÈia do Sul","Ar·bia Saudita",
-           "Argentina","Paquist„o","QuÍnia","BÈlgica","Fiji","¡ustria",
-           "Finl‚ndia","Jord‚nia","Nova Zel‚ndia","Sud„o","Tail‚ndia",
-           "Turquia","¡frica do Sul","MÈxico","Peru","Sri Lanka",
-           "Tanz‚nia","Bulg·ria","GrÈcia","Holanda","Kuwait","Mali",
-           "Marrocos","Serra Leoa","TunÌsia","Irlanda","Noruega",
-           "R˙ssia","Camarıes","Equador","Ir„","El Salvador"))
-  
+paises <- unique(SGs_db$pa√≠s)
 
-# Descritivos (apenas paÌses com OI)
-  WPI_3 %>%
+WPI_3 <- WPI_2 %>%
+    filter(pa√≠s %in% paises)
+  
+# Descritivos (apenas pa√≠ses com OI)
+WPI_3 %>%
     summarise(media = mean(poder, na.rm = TRUE), 
               mediana = median(poder, na.rm = TRUE), 
               minimo = min(poder, na.rm = TRUE),
               maximo = max(poder, na.rm = TRUE))
   
-  WPI_3 %>%
-    group_by(paÌs)%>%
+WPI_3 %>%
+    group_by(pa√≠s)%>%
     summarise(media = mean(poder, na.rm = TRUE), 
               mediana = median(poder, na.rm = TRUE), 
               minimo = min(poder, na.rm = TRUE),
               maximo = max(poder, na.rm = TRUE))
   
-
 # Para ver cada um dos grupos:
 
 # Mundiais
-  mundiais <- WPI_3 %>%
+
+mundiais <- WPI_3 %>%
     filter(poder >= 800)
   
-  ggplot(mundiais, aes(ano, poder)) +
-    geom_line(aes (group=paÌs)) +
+ggplot(mundiais, aes(ano, poder)) +
+    geom_line(aes (group=pa√≠s)) +
     theme_classic()
   
-# MÈdias
-  medias <- WPI_3 %>%
+# M√©dias
+medias <- WPI_3 %>%
     filter(poder >= 650 & poder < 800)
   
-  ggplot(medias, aes(ano, poder)) +
-    geom_line(aes (group=paÌs)) +
+ggplot(medias, aes(ano, poder)) +
+    geom_line(aes (group=pa√≠s)) +
     theme_classic()
   
 # Pequenas
-  pequenas <- WPI_3 %>%
+pequenas <- WPI_3 %>%
     filter(poder < 650)
   
-  ggplot(pequenas, aes(ano, poder)) +
-    geom_line(aes (group=paÌs)) +
+ggplot(pequenas, aes(ano, poder)) +
+    geom_line(aes (group=pa√≠s)) +
     theme_classic()
   
-
-# Recodificando a vari·vel do WPI para aparecer a categoria da potÍncia
-  WPI_4 <-  WPI_3 %>%
-    mutate(classificaÁ„o = case_when(poder < 650 ~ "3. PotÍncia menor",
-                           poder >= 650 & poder < 800 ~ "2. PotÍncia intermedi·ria",
-                           poder >= 800 ~ "1. PotÍncia mundial"))
+# Recodificando a vari√°vel do WPI para aparecer a categoria da pot√™ncia
+WPI_4 <-  WPI_3 %>%
+    mutate(classifica√ß√£o = case_when(poder < 650 ~ "3. Pot√™ncia menor",
+                           poder >= 650 & poder < 800 ~ "2. Pot√™ncia intermedi√°ria",
+                           poder >= 800 ~ "1. Pot√™ncia mundial"))
   
-# N„o mexer no WPI_4. Ser· usado para mergir. Se modificar algo, faÁa no 5.
-# Descobrindo quantas classificaÁıes cada paÌs possui.
+# N√£o mexer no WPI_4. Ser√° usado para mergir. Se modificar algo, fa√ßa no 5.
+# Descobrindo quantas classifica√ß√µes cada pa√≠s possui.
   
-  WPI_5 <- WPI_4 %>%
+WPI_5 <- WPI_4 %>%
     filter(ano != 2017)
       
-  WPI_6 <- WPI_5 %>%
-    group_by(paÌs, classificaÁ„o) %>% 
+WPI_6 <- WPI_5 %>%
+    group_by(pa√≠s, classifica√ß√£o) %>% 
     count()%>%
-    filter(classificaÁ„o == "1. PotÍncia mundial")
-
-  View(WPI_6)
+    filter(classifica√ß√£o == "1. Pot√™ncia mundial")
   
-#    filter(classificaÁ„o == "1. PotÍncia mundial")
-#    filter(classificaÁ„o == "2. PotÍncia intermedi·ria")
-#    filter(classificaÁ„o == "3. PotÍncia menor")  
+#    filter(classifica√ß√£o == "1. Pot√™ncia mundial")
+#    filter(classifica√ß√£o == "2. Pot√™ncia intermedi√°ria")
+#    filter(classifica√ß√£o == "3. Pot√™ncia menor")  
+    
+# Gr√°fico de linha para v√°rios pa√≠ses. Figura 2 do artigo.
   
+mudaram <- c("Canad√°", "It√°lia", "R√∫ssia", "China", "Austr√°lia",
+               "M√©xico", "Gr√©cia", "Cor√©ia do Sul", "Argentina",
+               "Ar√°bia Saudita", "Portugal", "Irlanda", "Turquia",
+               "√çndia", "Nova Zel√¢ndia", "Ir√£", "Tail√¢ndia",
+               "√Åfrica do Sul")
+   
+WPI_6 <- WPI_4 %>%
+    filter(pa√≠s %in% mudaram)
   
-# Gr·fico de linha para v·rios paÌses. Figura 2 do artigo.
-  
-  mudaram <- c("Canad·", "It·lia", "R˙ssia", "China", "Austr·lia",
-               "MÈxico", "GrÈcia", "CorÈia do Sul", "Argentina",
-               "Ar·bia Saudita", "Portugal", "Irlanda", "Turquia",
-               "Õndia", "Nova Zel‚ndia", "Ir„", "Tail‚ndia",
-               "¡frica do Sul")
-  
-  
-  WPI_6 <- WPI_4 %>%
-    filter(paÌs %in% mudaram)
-  
-  ggplot(WPI_6, aes(ano, poder)) +
-    geom_line(aes (group=paÌs, color=classificaÁ„o)) +
-    facet_wrap(~paÌs) +
+ggplot(WPI_6, aes(ano, poder)) +
+    geom_line(aes (group=pa√≠s, color=classifica√ß√£o)) +
+    facet_wrap(~pa√≠s) +
     theme_classic()+
   scale_x_continuous(breaks=seq(1975,2015,10))+
   scale_y_continuous(breaks=c(650,800))+
   labs(title = "Figura 2",
-         subtitle = "PaÌses que mudaram de classificaÁ„o",
+         subtitle = "Pa√≠ses que mudaram de classifica√ß√£o",
          x = "", 
          y = "WPI",
-         caption = "Fonte: ElaboraÁ„o prÛpria")
+         caption = "Fonte: Elabora√ß√£o pr√≥pria")
 
-  
-
-#### PARTE 2: Analisando as OrganizaÁıes Internacionais.
+#### PARTE 2: Analisando as Organiza√ß√µes Internacionais.
 
 # Abrindo a segunda base de dados
-    SGs_db <- read_excel("C:/Users/Felipe/Desktop/SGs_db.xlsx")
     
-    lideres <- SGs_db %>%
-      group_by(paÌs)%>%
+lideres <- SGs_db %>%
+      group_by(pa√≠s)%>%
       count()
      
-    summary(lideres$n)
+summary(lideres$n)
     
-    lideres %>%
+lideres %>%
       summarise(media = mean(lideres$n, na.rm = TRUE), 
                 mediana = median(lideres$n, na.rm = TRUE), 
                 minimo = min(lideres$n, na.rm = TRUE),
                 maximo = max(lideres$n, na.rm = TRUE),
                 dp = sd(lideres$n, na.rm = TRUE))
-    
-    
+        
 ##### PARTE 3: Juntando os bancos de dados
-    library(scales)
+library(scales)
 
 # Mergindo
-    PISI <- left_join(SGs_db, WPI_4,
-                      by = c("paÌs" = "paÌs",
+PISI <- left_join(SGs_db, WPI_4,
+                      by = c("pa√≠s" = "pa√≠s",
                              "ano" = "ano"))
 
-   
-# Fazendo uma db nova agrupada pela classificaÁ„o - Para colocar os valores na tabela.
-  db <- PISI %>%
-      group_by(ano, classificaÁ„o) %>% 
+# Fazendo uma db nova agrupada pela classifica√ß√£o - Para colocar os valores na tabela.
+db <- PISI %>%
+      group_by(ano, classifica√ß√£o) %>% 
       count()%>%
-      filter(classificaÁ„o != "NA")
+      filter(classifica√ß√£o != "NA")
 
-  dbb <- db %>%
+dbb <- db %>%
     group_by(ano)%>%
     summarise(soma = sum(n))
 
-  dbb2 <- left_join(db, dbb,
+dbb2 <- left_join(db, dbb,
                     by = c("ano" = "ano"))
   
-  dbb2 <- dbb2 %>%
+dbb2 <- dbb2 %>%
     mutate (percentual = n / soma)%>%
-    filter(classificaÁ„o == "2. PotÍncia intermedi·ria")
+    filter(classifica√ß√£o == "2. Pot√™ncia intermedi√°ria")
   
-  dbb3 <- PISI %>%
-    group_by(paÌs, classificaÁ„o)%>%
+dbb3 <- PISI %>%
+    group_by(pa√≠s, classifica√ß√£o)%>%
     count()%>%
-    filter(classificaÁ„o == "2. PotÍncia intermedi·ria")
+    filter(classifica√ß√£o == "2. Pot√™ncia intermedi√°ria")
   
-  dbb3 <- PISI %>%
-    group_by(paÌs, classificaÁ„o)%>%
+dbb3 <- PISI %>%
+    group_by(pa√≠s, classifica√ß√£o)%>%
     count()%>%
-    filter(classificaÁ„o == "3. PotÍncia menor")
+    filter(classifica√ß√£o == "3. Pot√™ncia menor")
   
-# Fazendo um gr·fico de linha
-    ggplot(db, aes(ano, n)) +
-      geom_line(aes (group=classificaÁ„o, color=classificaÁ„o)) +
+# Fazendo um gr√°fico de linha
+ggplot(db, aes(ano, n)) +
+      geom_line(aes (group=classifica√ß√£o, color=classifica√ß√£o)) +
       theme_classic()+
       scale_x_continuous(breaks=seq(1975,2015,5))+
       scale_y_continuous(breaks=seq(4,19,2))+
       labs(title = "Figura 3",
-           subtitle = "Total de OIs lideradas pelas potÍncias",
+           subtitle = "Total de OIs lideradas pelas pot√™ncias",
            x = "", 
            y = "OIs",
-           caption = "Fonte: ElaboraÁ„o prÛpria")
+           caption = "Fonte: Elabora√ß√£o pr√≥pria")
 
-# Gr·fico barras por categoria
-     ggplot(db, aes(fill=classificaÁ„o, y=n, x=ano)) + 
+# Gr√°fico barras por categoria
+ggplot(db, aes(fill=classifica√ß√£o, y=n, x=ano)) + 
       geom_bar(position="fill", stat="identity") +
       theme_classic()+
       scale_x_continuous(breaks=seq(1975,2015,5))+
       scale_y_continuous(labels = scales::percent)+
       labs(title = "Figura 4",
-           subtitle = "Porcentagem de OIs lideradas por grupos de potÍncias",
+           subtitle = "Porcentagem de OIs lideradas por grupos de pot√™ncias",
            x = "", 
            y = "",
-           caption = "Fonte: ElaboraÁ„o prÛpria")
+           caption = "Fonte: Elabora√ß√£o pr√≥pria")
 
-
-    
-# Selecionando paÌs e classificaÁ„o.
-    db1 <- PISI %>%
-      group_by(ano, paÌs, classificaÁ„o) %>%
+# Selecionando pa√≠s e classifica√ß√£o.
+db1 <- PISI %>%
+      group_by(ano, pa√≠s, classifica√ß√£o) %>%
       count()%>%
-      filter(classificaÁ„o != "NA")%>%
-      mutate(sigla = case_when(paÌs == "Estados Unidos" ~ "Estados Unidos",
-            paÌs == "FranÁa" ~ "FranÁa", paÌs == "Jap„o" ~ "Jap„o",
-            paÌs == "SuÈcia" ~ "SuÈcia", paÌs == "Egito" ~ "Egito",
-            paÌs == "Brasil" ~ "Brasil", paÌs == "NigÈria" ~ "NigÈria",
-            paÌs == "Õndia" ~ "Õndia", paÌs == "Austr·lia" ~ "AU",
-            paÌs == "Senegal" ~ "Senegal", paÌs == "Canad·" ~ "Canad·",
-            paÌs == "SuÌÁa" ~ "SuÌÁa", paÌs == "Gana" ~ "Gana",
-            paÌs == "Reino Unido" ~ "Reino Unido", paÌs == "ArgÈlia" ~ "ArgÈlia",
-            paÌs == "Chile" ~ "Chile", paÌs == "Dinamarca" ~ "Dinamarca",
-            paÌs == "It·lia" ~ "It·lia", paÌs == "Alemanha" ~ "Ale- manha",
-            paÌs == "Espanha" ~ "Espanha", paÌs == "Filipinas" ~ "Filipinas",
-            paÌs == "LÌbano" ~ "LÌ- bano", paÌs == "Portugal" ~ "PT",
-            paÌs == "China" ~ "CN", paÌs == "CorÈia do Sul" ~ "CorÈia do Sul",
-            paÌs == "Ar·bia Saudita" ~ "SA", paÌs == "Argentina" ~ "Argen-  tina",
-            paÌs == "Paquist„o" ~ "Paquist„o", paÌs == "QuÍnia" ~ "QuÍnia",
-            paÌs == "BÈlgica" ~ "BÈlgica", paÌs == "Fiji" ~ "Fiji",
-            paÌs == "¡ustria" ~ "¡ustria", paÌs == "Finl‚ndia" ~ "Finl‚ndia",
-            paÌs == "Jord‚nia" ~ "Jor- d‚nia", paÌs == "Nova Zel‚ndia" ~ "NZ",
-            paÌs == "Sud„o" ~ "Sud„o", paÌs == "Tail‚ndia" ~ "Tai- l‚ndia",
-            paÌs == "Turquia" ~ "Turquia", paÌs == "¡frica do Sul" ~ "¡. do Sul",
-            paÌs == "MÈxico" ~ "MÈxico", paÌs == "Peru" ~ "Peru",
-            paÌs == "Sri Lanka" ~ "Sri Lanka", paÌs == "Tanz‚nia" ~ "Tanz‚nia",
-            paÌs == "Bulg·ria" ~ "Bul- g·ria", paÌs == "GrÈcia" ~ "GrÈcia",
-            paÌs == "Holanda" ~ "NL", paÌs == "Kuwait" ~ "Kuwait",
-            paÌs == "Mali" ~ "Mali", paÌs == "Marrocos" ~ "Mar- rocos",
-            paÌs == "Serra Leoa" ~ "Serra Leoa", paÌs == "TunÌsia" ~ "TunÌsia",
-            paÌs == "Irlanda" ~ "Irlanda", paÌs == "Noruega" ~ "NO",
-            paÌs == "R˙ssia" ~ "R˙ssia", paÌs == "Camarıes" ~ "Cama- rıes",
-            paÌs == "Equador" ~ "EC", paÌs == "Ir„" ~ "Ir„",
-            paÌs == "El Salvador" ~ "SV"))
+      filter(classifica√ß√£o != "NA")%>%
+      mutate(sigla = case_when(pa√≠s == "Estados Unidos" ~ "Estados Unidos",
+            pa√≠s == "Fran√ßa" ~ "Fran√ßa", pa√≠s == "Jap√£o" ~ "Jap√£o",
+            pa√≠s == "Su√©cia" ~ "Su√©cia", pa√≠s == "Egito" ~ "Egito",
+            pa√≠s == "Brasil" ~ "Brasil", pa√≠s == "Nig√©ria" ~ "Nig√©ria",
+            pa√≠s == "√çndia" ~ "√çndia", pa√≠s == "Austr√°lia" ~ "AU",
+            pa√≠s == "Senegal" ~ "Senegal", pa√≠s == "Canad√°" ~ "Canad√°",
+            pa√≠s == "Su√≠√ßa" ~ "Su√≠√ßa", pa√≠s == "Gana" ~ "Gana",
+            pa√≠s == "Reino Unido" ~ "Reino Unido", pa√≠s == "Arg√©lia" ~ "Arg√©lia",
+            pa√≠s == "Chile" ~ "Chile", pa√≠s == "Dinamarca" ~ "Dinamarca",
+            pa√≠s == "It√°lia" ~ "It√°lia", pa√≠s == "Alemanha" ~ "Ale- manha",
+            pa√≠s == "Espanha" ~ "Espanha", pa√≠s == "Filipinas" ~ "Filipinas",
+            pa√≠s == "L√≠bano" ~ "L√≠- bano", pa√≠s == "Portugal" ~ "PT",
+            pa√≠s == "China" ~ "CN", pa√≠s == "Cor√©ia do Sul" ~ "Cor√©ia do Sul",
+            pa√≠s == "Ar√°bia Saudita" ~ "SA", pa√≠s == "Argentina" ~ "Argen-  tina",
+            pa√≠s == "Paquist√£o" ~ "Paquist√£o", pa√≠s == "Qu√™nia" ~ "Qu√™nia",
+            pa√≠s == "B√©lgica" ~ "B√©lgica", pa√≠s == "Fiji" ~ "Fiji",
+            pa√≠s == "√Åustria" ~ "√Åustria", pa√≠s == "Finl√¢ndia" ~ "Finl√¢ndia",
+            pa√≠s == "Jord√¢nia" ~ "Jor- d√¢nia", pa√≠s == "Nova Zel√¢ndia" ~ "NZ",
+            pa√≠s == "Sud√£o" ~ "Sud√£o", pa√≠s == "Tail√¢ndia" ~ "Tai- l√¢ndia",
+            pa√≠s == "Turquia" ~ "Turquia", pa√≠s == "√Åfrica do Sul" ~ "√Å. do Sul",
+            pa√≠s == "M√©xico" ~ "M√©xico", pa√≠s == "Peru" ~ "Peru",
+            pa√≠s == "Sri Lanka" ~ "Sri Lanka", pa√≠s == "Tanz√¢nia" ~ "Tanz√¢nia",
+            pa√≠s == "Bulg√°ria" ~ "Bul- g√°ria", pa√≠s == "Gr√©cia" ~ "Gr√©cia",
+            pa√≠s == "Holanda" ~ "NL", pa√≠s == "Kuwait" ~ "Kuwait",
+            pa√≠s == "Mali" ~ "Mali", pa√≠s == "Marrocos" ~ "Mar- rocos",
+            pa√≠s == "Serra Leoa" ~ "Serra Leoa", pa√≠s == "Tun√≠sia" ~ "Tun√≠sia",
+            pa√≠s == "Irlanda" ~ "Irlanda", pa√≠s == "Noruega" ~ "NO",
+            pa√≠s == "R√∫ssia" ~ "R√∫ssia", pa√≠s == "Camar√µes" ~ "Cama- r√µes",
+            pa√≠s == "Equador" ~ "EC", pa√≠s == "Ir√£" ~ "Ir√£",
+            pa√≠s == "El Salvador" ~ "SV"))
         
 # Treemap
-       library(scales)
-       library(treemap)
-       library(RColorBrewer)
+library(treemap)
+library(RColorBrewer)
     
-    
-    treemap(db1,
-            index=c("classificaÁ„o","sigla"),
+treemap(db1,
+            index=c("classifica√ß√£o","sigla"),
             vSize="n",
             type="index",
             palette = "Set1",
-            title="Figura 1 - DistribuiÁ„o de OIs/ano por classificaÁ„o e paÌs",
+            title="Figura 1 - Distribui√ß√£o de OIs/ano por classifica√ß√£o e pa√≠s",
 
             border.col=c("black","black"),
             border.lwds=c(1,1),
